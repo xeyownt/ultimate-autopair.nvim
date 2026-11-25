@@ -150,7 +150,9 @@ function M.run_test(testopt)
     if #key~=1 then
         M.fn.warning('DEBUG: is not interactive and size of key is not 1')
     end
+    if opt.block_insert then ua_core.on_mode_changed('\22','i') end
     local action=ua_core.run(map[key] or key)
+    if opt.block_insert then ua_core.on_mode_changed('i','n') end
     local deparsed_result_line=M.run_action(action,lines,linenr,col,opt)
     if deparsed_result_line~=unparsed_resulting_line then
         return M.stat.faild,deparsed_result_line

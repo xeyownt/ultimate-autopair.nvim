@@ -1,4 +1,7 @@
 return {
+    block_insert={
+        {'(|)',' ','( |)',{block_insert=true}},
+    },
     simple={
         {'|','(','(|)'},
         {'(|)',')','()|'},

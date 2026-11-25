@@ -39,6 +39,7 @@ M.map={}
 M.modes={'i','c'}
 M.funcs={}
 M.I={}
+M.block_insert=false
 ---@param mode string
 ---@return table<string,table>
 function M.I.get_maps(mode)
@@ -85,7 +86,7 @@ end
 ---@param key string
 ---@return string
 function M.run(key)
-    if M.disable then
+    if M.disable or M.block_insert then
         return M.I.activate_iabbrev(key)
     end
     local o=M.get_o_value(key)
@@ -104,6 +105,11 @@ function M.run(key)
         return M.I.activate_iabbrev(key)
     end
     return key
+end
+---@param old_mode string
+---@param new_mode string
+function M.on_mode_changed(old_mode,new_mode)
+    M.block_insert=old_mode=='\22' and new_mode=='i'
 end
 ---@param key string
 ---@return string
@@ -155,6 +161,7 @@ function M.clear()
     end
     M.mem={}
     M.map={}
+    M.block_insert=false
 end
 ---@param mem core.module[]
 function M.sort_mem(mem)
@@ -207,6 +214,13 @@ function M.init_mapped(mapped,mode)
 end
 function M.init()
     vim.api.nvim_create_augroup('UltimateAutopair',{clear=false})
+    vim.api.nvim_create_autocmd('ModeChanged',{
+        group='UltimateAutopair',
+        pattern='*',
+        callback=function ()
+            M.on_mode_changed(vim.v.event.old_mode,vim.v.event.new_mode)
+        end,
+    })
     M.sort_mem(M.mem)
     for _,mode in ipairs(M.modes) do
         local mapped=M.get_mem_maps(mode)
